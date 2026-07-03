@@ -7,11 +7,42 @@ on:
 
 concurrency: deploy-group
 
-# M2 will add an eval job here and gate the deploy on it:
-#   deploy.needs: [evals]
 jobs:
+  evals:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/agent
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: Eval gate (skips until a provider key secret is set)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          DEFAULT_MODEL: ${{ vars.DEFAULT_MODEL }}
+          AGENT_DB_PATH: /tmp/evals.db
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$OPENAI_API_KEY" ] && [ -z "$GOOGLE_API_KEY" ]; then
+            echo "No provider key configured — skipping eval gate."
+            exit 0
+          fi
+          python -m agent_service.evals --report /tmp/eval-report.json
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: /tmp/eval-report.json
+          if-no-files-found: ignore
+
   deploy:
     runs-on: ubuntu-latest
+    needs: evals
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
