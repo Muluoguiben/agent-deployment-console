@@ -1,0 +1,99 @@
+[
+  {
+    "id": "KI-001",
+    "title": "H.265 decode failure on WebView 92-94",
+    "status": "workaround-available",
+    "severity_default": "S3",
+    "error_codes": ["VP-4102"],
+    "symptoms": ["black screen with audio", "video decode error", "VP-4102 after playback starts"],
+    "affected": { "head_units": ["HU-7", "HU-9", "AuroraOS 3.x"], "webview_below": 95, "regions": ["all"] },
+    "action": "Enable remote config flag video.codec_fallback=h264 for the account or fleet. Permanent fix requires OEM WebView OTA to 95+. Do not advise reinstalling the app.",
+    "requires_escalation": false,
+    "kb_ref": ["video-playback-troubleshooting.md", "device-compatibility.md"]
+  },
+  {
+    "id": "KI-002",
+    "title": "EU consent flow v2 missing or stale consent state",
+    "status": "resolved-by-user-action",
+    "severity_default": "S3",
+    "error_codes": [],
+    "symptoms": ["infinite loading spinner before playback", "player never starts", "no error code shown"],
+    "affected": { "head_units": ["all"], "regions": ["DE", "FR", "NL"] },
+    "action": "Settings > Privacy > Reset consent, then relaunch the app; consent flow v2 appears on next playback attempt. If the consent screen itself fails to load, collect logs and escalate S3.",
+    "requires_escalation": false,
+    "kb_ref": ["regional-compliance-eu.md", "video-playback-troubleshooting.md"]
+  },
+  {
+    "id": "KI-003",
+    "title": "HU-7 clock skew after battery disconnect breaks QR pairing",
+    "status": "workaround-available",
+    "severity_default": "S3",
+    "error_codes": [],
+    "symptoms": ["QR code expired immediately", "QR pairing fails repeatedly", "login QR invalid"],
+    "affected": { "head_units": ["HU-7"], "regions": ["all"] },
+    "action": "Enable Settings > System > Automatic time (NTP), reboot the head unit, retry pairing. Verify head-unit clock against phone clock.",
+    "requires_escalation": false,
+    "kb_ref": ["login-and-accounts.md", "device-compatibility.md"]
+  },
+  {
+    "id": "KI-004",
+    "title": "AuroraOS 3.2 split-screen crash during video playback",
+    "status": "fix-scheduled",
+    "fix_version": "app 2.8",
+    "severity_default": "S3",
+    "error_codes": [],
+    "symptoms": ["playback stops entering split-screen", "app crashes in split-screen", "screen goes blank when splitting display"],
+    "affected": { "head_units": ["AuroraOS 3.x"], "os_versions": ["3.2"], "regions": ["all"] },
+    "action": "No workaround. Set expectations: fix ships in app 2.8. Do not suggest settings changes; they do not help.",
+    "requires_escalation": false,
+    "kb_ref": ["video-playback-troubleshooting.md", "device-compatibility.md"]
+  },
+  {
+    "id": "KI-005",
+    "title": "Vehicle provisioning region does not match account region",
+    "status": "escalation-required",
+    "severity_default": "S2",
+    "error_codes": [],
+    "symptoms": ["service not available in your region after vehicle import", "region error on login", "worked in old country, blocked after moving"],
+    "affected": { "head_units": ["all"], "regions": ["all"] },
+    "action": "Backend region reset required; triage has no write access to provisioning records. Escalate S2 with VIN region, account region, and account ID. Never advise creating a new account.",
+    "requires_escalation": true,
+    "kb_ref": ["login-and-accounts.md", "regional-compliance-eu.md", "escalation-policy.md"]
+  },
+  {
+    "id": "KI-006",
+    "title": "HU-9 audio/video desync after cellular handoff",
+    "status": "investigating",
+    "severity_default": "S3",
+    "error_codes": [],
+    "symptoms": ["audio ahead of video while driving", "lip sync drifts on highway", "desync after signal switch"],
+    "affected": { "head_units": ["HU-9"], "regions": ["all"] },
+    "action": "No user-side fix; do not promise one. Collect playback log bundle (Settings > About > Export logs) and escalate S3 to the owning team.",
+    "requires_escalation": true,
+    "kb_ref": ["video-playback-troubleshooting.md", "network-connectivity.md"]
+  },
+  {
+    "id": "KI-007",
+    "title": "Fleet channel authorization key expired",
+    "status": "workaround-available",
+    "severity_default": "S2",
+    "error_codes": [],
+    "symptoms": ["authorization required on all fleet vehicles", "entire fleet logged out at once", "fleet-wide login failure"],
+    "affected": { "head_units": ["HU-7", "HU-9"], "plans": ["Fleet"], "regions": ["all"] },
+    "action": "Self-service: fleet admin portal > Admin > Contracts > Renew. Triage can send the renewal guide but cannot renew on the customer's behalf. If vehicles are still logged out 24h after renewal, escalate S2.",
+    "requires_escalation": false,
+    "kb_ref": ["login-and-accounts.md", "escalation-policy.md"]
+  },
+  {
+    "id": "KI-008",
+    "title": "RTL subtitle languages (Arabic, Hebrew) not supported",
+    "status": "planned",
+    "severity_default": "S4",
+    "error_codes": [],
+    "symptoms": ["arabic subtitles missing", "hebrew subtitles not listed", "RTL captions unavailable"],
+    "affected": { "head_units": ["all"], "regions": ["all"] },
+    "action": "Known limitation on the roadmap; no ETA committed. Do not promise a date.",
+    "requires_escalation": false,
+    "kb_ref": ["known-issues-registry.md"]
+  }
+]
