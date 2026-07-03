@@ -2,7 +2,7 @@
 
 > A production-style operations console for an LLM support-triage agent — versioned deploys, eval-gated CI, step-level traces, one-click rollback.
 
-**Status: M0 — walking skeleton.** Deploy pipeline, CI, and the mock support domain land first; the agent and console are built on top. Roadmap below.
+**Status: M2 — feature-complete core.** The agent, the eval gate, versioned deploys with rollback, step-level traces, and the human-handoff inbox are all working; remaining work is packaging (walkthrough video, live-demo URL). Roadmap below.
 
 ## Why this exists
 
@@ -30,18 +30,43 @@ data/         mock support domain       KB docs (RAG corpus) · accounts/devices
 CI            GitHub Actions            lint + tests now · eval-gated deploys in M2
 ```
 
+## What's inside
+
+- **The agent** — a hand-built LangGraph `StateGraph` with four tools (`search_kb`,
+  `lookup_account`, `create_ticket`, `escalate_to_human`) and a hard 8-turn iteration cap
+  that forces an escalation instead of looping — the same "never silently drop" rule the
+  KB imposes on human triage.
+- **Provider-agnostic models** — the model is a provider-prefixed string
+  (`anthropic:…`, `openai:…`, `google_genai:…`) stored in the **versioned agent config**,
+  so switching providers is a deploy, not a code change.
+- **Eval gate** — 26 scenario cases (known issues, hallucination bait, out-of-scope,
+  escalations, tool failures) asserted against real captured traces plus an optional
+  LLM judge. `python -m agent_service.evals` exits nonzero below the threshold, and the
+  deploy workflow requires it.
+- **Versions & rollback** — prompt/model/knobs are rows in a registry; deploy flips the
+  live pointer, rollback flips it back, every trace records which version served it.
+- **Traces** — every run stores a step-level timeline (LLM calls, tool I/O, latency,
+  tokens) the console renders; eval failures link straight to their trace.
+- **Inbox** — escalations arrive with the structured handoff the escalation policy
+  requires: symptom, context, ruled-out causes, suspected cause, severity.
+- **Demo mode** — `DEMO_SEED=1` seeds three honest scripted conversations (real graph,
+  real tools, real traces; only the LLM replies are scripted, marked `source=seed`) so
+  the console is fully browsable with no API key.
+
 ## Roadmap
 
 - [x] **M0 — walking skeleton**: monorepo, CI, Docker + Fly.io deploy, mock domain data
-- [ ] **M1 — agent core**: LangGraph agent with 4 tools, trace capture, minimal chat UI
-- [ ] **M2 — the console**: trace viewer, 25+ case eval set, eval-gated deploys, versioned agent configs with one-click rollback, human-handoff inbox
-- [ ] **M3 — packaging**: walkthrough video, live-demo hardening (rate limits, replay mode)
+- [x] **M1 — agent core**: LangGraph agent with 4 tools, trace capture, SSE chat
+- [x] **M2 — the console**: trace viewer, 26-case eval gate in CI, versioned configs with one-click rollback, human-handoff inbox
+- [ ] **M3 — packaging**: walkthrough video, public live-demo URL
 
 ## Development
 
 ```bash
 # agent (Python 3.12)
 cd apps/agent && python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+export ANTHROPIC_API_KEY=...     # or OPENAI_API_KEY / GOOGLE_API_KEY
+export DEFAULT_MODEL=anthropic:claude-haiku-4-5   # any provider:model-id
 make dev-agent      # FastAPI on :8080
 
 # console (Node 22+)
@@ -49,6 +74,9 @@ cd apps/console && npm install
 make dev-console    # Vite on :5173, proxies /api to :8080
 
 make test && make lint
+
+# run the eval gate locally
+cd apps/agent && .venv/bin/python -m agent_service.evals --report report.json
 ```
 
 ## Deploy

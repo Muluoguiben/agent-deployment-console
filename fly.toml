@@ -3,6 +3,14 @@ primary_region = "sin"
 
 [build]
 
+[env]
+  DEMO_SEED = "1"
+  AGENT_DB_PATH = "/app/data-volume/console.db"
+
+[mounts]
+  source = "console_data"
+  destination = "/app/data-volume"
+
 [http_service]
   internal_port = 8080
   force_https = true

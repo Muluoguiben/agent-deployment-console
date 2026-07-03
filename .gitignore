@@ -12,3 +12,4 @@ __pycache__/
 *.sqlite3
 .DS_Store
 coverage/
+apps/agent/src/agent_service/static/
