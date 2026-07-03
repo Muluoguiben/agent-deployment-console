@@ -89,7 +89,9 @@ def build_tools(ctx: RunContext, enabled: list[str]) -> list[BaseTool]:
         """Escalate to a human agent with a structured handoff. Required when: no KB match,
         backend data change needed (e.g. region reset), issue under investigation, or the
         request is out of triage scope (billing, refunds, legal, privacy/data requests).
-        severity is S1-S4 per escalation policy."""
+        severity must come from the KB escalation policy, not guesswork — if you have not
+        confirmed the severity for this request type, call search_kb('escalation policy
+        severity') first (some request types have a mandated severity)."""
         summary = {
             "symptom": symptom,
             "account_context": account_id,

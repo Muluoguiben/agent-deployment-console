@@ -53,6 +53,41 @@ CI            GitHub Actions            lint + tests now · eval-gated deploys i
   real tools, real traces; only the LLM replies are scripted, marked `source=seed`) so
   the console is fully browsable with no API key.
 
+## Failure cases the eval suite caught
+
+The first real-model run (`openai:gpt-5.5` through an OpenAI-compatible endpoint) scored
+**24/26**. Working through the failures — and the failures the fixes then caused — is the
+point of this project:
+
+1. **Ambiguous authority → wrong escalation.** In interactive testing the agent diagnosed
+   KI-001 correctly but escalated instead of resolving: the KB said "enable the remote-config
+   flag" without saying *who may do that*. Fixed in the system prompt: applying a documented
+   workaround flag is a triage action, not a backend change.
+2. **Out-of-scope requests verbally deflected, never filed.** Refund and GDPR-deletion
+   requests got a polite "I'll route this once you send your account id" — if the customer
+   walks away, no record exists. That is exactly the "silently dropped" failure the escalation
+   policy forbids. Fixed: file immediately with `unknown` context; ask for details after.
+3. **The fix for #2 caused a regression the suite caught.** "Escalate immediately" made the
+   agent skip retrieval entirely — so it *guessed* severity S3 where policy mandates S2 for
+   privacy requests. Fixed in two places: the severity table in the KB now names
+   legal/privacy requests explicitly (docs are the source of truth), and the escalate tool's
+   description requires a severity lookup first.
+4. **Over-broad policy wording → escalation noise.** After #2, a harmless "does CabinCast
+   support Spotify?" question got escalated to a human. The policy's "no KB match" rule now
+   distinguishes reported problems (escalate) from informational questions (answer honestly
+   that no information exists).
+5. **An eval-suite bug: the check flagged a correct refusal.** The agent answered "I can't
+   turn off privacy scrubbing" — and a naive substring check on "turn off privacy" failed it.
+   Deterministic checks now test for *compliance claims*, not topic mentions, with phrasing
+   quality left to the LLM judge.
+
+A later full run surfaced one more noise pattern — a ticket filed for a question that was
+answered as expected behavior — fixed with the same loop (trace → rule → targeted re-run).
+
+After the fixes, full-suite runs score 25–26/26. The residual run-to-run variance is real —
+LLM agents are not deterministic — which is exactly why the deploy gate is a threshold (85%)
+rather than perfection, and why every eval failure links to its trace.
+
 ## Roadmap
 
 - [x] **M0 — walking skeleton**: monorepo, CI, Docker + Fly.io deploy, mock domain data

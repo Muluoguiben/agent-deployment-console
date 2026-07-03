@@ -9,14 +9,16 @@ grounded in the KB; never drop an issue silently.
 | Severity | Definition | Example |
 |---|---|---|
 | S1 | Safety-relevant or fleet-wide outage | Fleet-wide login failure |
-| S2 | Feature unusable, no workaround, backend action required | Region provisioning mismatch (KI-005) |
+| S2 | Feature unusable, no workaround, backend action required; legal/privacy/data-subject requests | Region provisioning mismatch (KI-005); GDPR deletion or export request |
 | S3 | Degraded experience, workaround exists or fix scheduled | A/V desync (KI-006), buffering with CDN mis-routing |
 | S4 | Cosmetic, question, or expected behavior | Layout question, private-mode behavior |
 
 ## The agent MUST escalate when
 
-1. **No KB match** — symptoms match no doc and no known issue. Do not invent
-   a resolution.
+1. **No KB match for a reported problem** — the customer's symptoms match no doc
+   and no known issue. Do not invent a resolution. (Purely informational or
+   product questions the KB doesn't cover are different: answer honestly that
+   the information isn't available — no escalation needed.)
 2. **Backend data change required** — e.g., region provisioning reset
    (KI-005). Triage has no write access to provisioning records.
 3. **Out of scope** — billing, refunds, legal, privacy/data-subject requests,
